@@ -1,0 +1,30 @@
+# colcon / ROS2 build output
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Data and media (kept in ~/fyp_data, backed up with rsync)
+data/
+recordings/
+*.bag
+*.db3
+*.mcap
+*.mp4
+*.avi
+*.mov
+
+# Secrets
+.env
+*.env
+*.key
+*.pem
+secrets*
+
+# Editors / OS
+.vscode/
+.DS_Store
