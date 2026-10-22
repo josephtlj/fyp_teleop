@@ -25,5 +25,6 @@ Yahboom's own code (APP_DOFBOT, their example packages, Arm_Lib) is not part of 
 ## Notes
 
 - Everything installed inside the container is recorded in `tools/container_setup.sh`, so the container can be rebuilt.
+- The `host/` scripts run on the Pi host in the venv `~/fyp_venv` (needs `bleak`). IMU firmware, calibration and test results are in `docs/imu_notes.md`.
 - Recordings and other large data live in `~/fyp_data` on the Pi, outside git. Back them up from the Mac with `tools/backup_from_pi.sh`.
 - Files created inside the container are owned by root. If git or an editor can't modify them, run `sudo chown -R pi:pi ~/colcon_ws/src/fyp_teleop` on the Pi.
