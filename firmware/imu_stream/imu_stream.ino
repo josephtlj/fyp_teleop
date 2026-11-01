@@ -8,7 +8,7 @@
 // Each board gets its own IMU_ID (1, 2 or 3), which sets its BLE name FYP-IMU-<id>.
 //
 // Commands received over BLE UART (one per line):
-//   raw                     toggle raw magnetometer mode: lines become seq,mx,my,mz (uT, uncorrected);
+//   raw                     toggle raw magnetometer mode: lines become seq,mx,my,mz (uT, uncorrected).
 //                           the red LED and a blue NeoPixel stay on while it is active, so the
 //                           person rotating the board knows when to keep going
 //   cal,ox,oy,oz,sx,sy,sz   store magnetometer calibration: corrected = (raw - o) * s
@@ -112,7 +112,7 @@ int filterIndex(const char *name) {
   return -1;
 }
 
-// VBAT goes through a 1:2 divider to A6; read it against the 3.0 V internal reference.
+// VBAT goes through a 1:2 divider to A6. Read it against the 3.0 V internal reference.
 int readBatteryMv() {
   analogReference(AR_INTERNAL_3_0);
   analogReadResolution(12);

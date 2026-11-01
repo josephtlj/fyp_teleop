@@ -20,7 +20,7 @@ from bleak import BleakClient, BleakScanner
 NUS_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"  # host -> board
 NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"  # board -> host
 MIN_RANGE_RATIO = 0.7  # each axis's range must be at least this fraction of the largest
-MAX_SPREAD_PCT = 6.0  # corrected field strength must vary less than this; board 1 reached 2.8%
+MAX_SPREAD_PCT = 6.0  # corrected field strength must vary less than this. Board 1 reached 2.8%
 SKIP_SECONDS = 10
 SAMPLE_HZ = 50  # raw mode send rate on the board
 CHUNK = 20  # the board's RX characteristic takes at most 20 bytes per write
@@ -100,9 +100,9 @@ async def main(seconds, name, csv_path=None, samples=None):
         print(f"Field strength after:  {mean_after:.1f} uT +/- {spread_after:.1f}%")
 
         if min(half) < MIN_RANGE_RATIO * max(half):
-            sys.exit("Coverage too low on at least one axis; not saving. Rotate more fully and retry.")
+            sys.exit("Coverage too low on at least one axis, not saving. Rotate more fully and retry.")
         if spread_after > MAX_SPREAD_PCT:
-            sys.exit(f"Fit too poor (+/- {spread_after:.1f}% > {MAX_SPREAD_PCT}%); not saving. Check for "
+            sys.exit(f"Fit too poor (+/- {spread_after:.1f}% > {MAX_SPREAD_PCT}%), not saving. Check for "
                      "anything moving relative to the board or nearby metal, and retry.")
 
         cmd = "cal," + ",".join(f"{v:.3f}" for v in offset) + "," + ",".join(f"{v:.4f}" for v in scale)
