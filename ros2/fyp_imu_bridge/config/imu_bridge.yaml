@@ -1,0 +1,10 @@
+imu_udp_node:
+  ros__parameters:
+    port: 9870
+    # Body segment of board 1, 2 and 3, in that order. Topics are /imu/<segment>.
+    segments: ["upper_arm", "forearm", "hand"]
+    # Orientation variance per axis in rad^2. 0.0012 is about (2 deg)^2, the boards'
+    # typical disagreement during slow motion in the consistency test.
+    orientation_variance: 0.0012
+    # A board with no sample for this long is reported as stale.
+    stale_after_s: 0.5
