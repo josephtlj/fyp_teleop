@@ -6,68 +6,33 @@ Boards are connected one after another (BlueZ dislikes parallel connects), with 
 then all stream together. CSV columns: t, board, seq, qw, qx, qy, qz (t in seconds from start).
 """
 import asyncio
-import subprocess
+import logging
 import sys
 
-from bleak import BleakClient, BleakScanner
-
-NUS_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
-CONNECT_ATTEMPTS = 3
-
-
-def drop_stale_connections():
-    # A recorder that was killed leaves BlueZ connected to the boards; connected boards stop
-    # advertising, so a new run would not find them.
-    out = subprocess.run(["bluetoothctl", "devices", "Connected"], capture_output=True, text=True).stdout
-    for line in out.splitlines():
-        parts = line.split(maxsplit=2)
-        if len(parts) == 3 and parts[2].startswith("FYP-IMU"):
-            subprocess.run(["bluetoothctl", "disconnect", parts[1]], capture_output=True)
-            print(f"Dropped stale connection to {parts[2]}")
-
-
-async def connect(name):
-    err = None
-    for _ in range(CONNECT_ATTEMPTS):
-        try:
-            device = await BleakScanner.find_device_by_name(name, timeout=10)
-            if device is None:
-                err = "not found"
-                continue
-            client = BleakClient(device, timeout=20)
-            await client.connect()
-            return client
-        except Exception as e:
-            err = repr(e)
-    sys.exit(f"{name}: could not connect ({err})")
+from ble_common import NUS_TX, connect, drop_stale_connections, line_splitter
 
 
 async def main(seconds, csv_path, names):
     loop = asyncio.get_running_loop()
     rows = []
     clients = []
-    recording = False  # only keep samples inside the common window, not during (dis)connects
+    recording = False  # only keep samples inside the common window, not while connecting
 
     def handler(name):
-        buf = ""
-
-        def on_data(_, data):
-            nonlocal buf
-            buf += data.decode(errors="replace")
-            *lines, buf = buf.split("\n")
+        def on_line(line):
             if not recording:
                 return
-            now = loop.time()
-            for line in lines:
-                parts = line.split(",")
-                if len(parts) == 5:
-                    rows.append((now, name, int(parts[0]), *map(float, parts[1:])))
-        return on_data
+            parts = line.split(",")
+            if len(parts) == 5:
+                rows.append((loop.time(), name, int(parts[0]), *map(float, parts[1:])))
+        return line_splitter(on_line)
 
     drop_stale_connections()
     try:
         for name in names:
             client = await connect(name)
+            if client is None:
+                sys.exit(f"{name}: could not connect")
             clients.append(client)
             print(f"{name} connected")
         for name, client in zip(names, clients):
@@ -100,5 +65,6 @@ async def main(seconds, csv_path, names):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(message)s", level=logging.INFO)
     asyncio.run(main(float(sys.argv[1]), sys.argv[2],
                      sys.argv[3:] or ["FYP-IMU-1", "FYP-IMU-2", "FYP-IMU-3"]))
